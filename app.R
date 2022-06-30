@@ -1,23 +1,39 @@
 library(shiny)
+library(tidyverse)
 
 # Define UI for application that draws a histogram
 ui <- pageWithSidebar(
   headerPanel("Eye-tracking accuracy tool"),
   sidebarPanel(
-    verbatimTextOutput("accuracy")
+    verbatimTextOutput("accuracy"),
+    actionButton("do", "Accept Point")
   ),
   mainPanel(
-    imageOutput("preImage", brush = "plot_brush")
+    imageOutput("preImage", brush = "plot_brush"),
+    headerPanel(""),
+    headerPanel(""),
+    headerPanel(""),
+    headerPanel(""),
+    headerPanel(""),
+    headerPanel(""),
+    tableOutput('table')
   )
 )
 
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
-  # Send a pre-rendered image, and don't delete the image after sending it
+  acc_table <- tibble(image_id = "", error = NA)
+  
   output$preImage <- renderImage({
     filename <- normalizePath(file.path('./images/355.jpg'))
     list(src = filename, width = 640, height = 480)
   }, deleteFile = FALSE)
+  
+  observeEvent(input$do, {
+    
+  })
+  
+  output$table <- renderTable(acc_table)
   
   output$accuracy <- renderText({
     xy_dist <- function(e) {
