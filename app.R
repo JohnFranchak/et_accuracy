@@ -5,6 +5,7 @@ library(tidyverse)
 ui <- pageWithSidebar(
   headerPanel("Eye-tracking accuracy tool"),
   sidebarPanel(
+    fileInput("files", "Upload", multiple = TRUE, accept = c(".jpg", ".jpeg", ".png")),
     verbatimTextOutput("accuracy"),
     actionButton("do", "Accept Point")
   ),
@@ -23,6 +24,18 @@ ui <- pageWithSidebar(
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
   values <- reactiveValues(acc_table = tibble(image_id = "", distance_pixels = NA, error_degrees = NA))
+  
+  img_list <- reactive({
+    validate(need(input$files != "", "select files..."))
+    
+    if (is.null(input$files)) {
+      return(NULL)
+    } else {
+      
+      path_list <- as.list(input$files$datapath)
+      return(path_list)
+    }
+  })
   
   xy_dist <- function(e) {
     if(is.null(e)) return(list(dist_px = NA, acc_deg = NA))
@@ -53,7 +66,7 @@ server <- function(input, output, session) {
   observeEvent(input$do, {
     acc_output <- xy_dist(input$plot_brush)
     values$acc_table <- bind_rows(values$acc_table, 
-                           tibble(image_id = "", acc_output$dist_px, error_degrees = acc_output$acc_deg)) %>% 
+                           tibble(image_id = "", distance_pixels = acc_output$dist_px, error_degrees = acc_output$acc_deg)) %>% 
       drop_na(error_degrees)
   })
   
