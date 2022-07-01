@@ -4,9 +4,12 @@ library(tidyverse)
 ui <- pageWithSidebar(
   headerPanel("Eye-tracking accuracy tool"),
   sidebarPanel(
-    fileInput("myFile", "Choose a file", accept = c('image/png', 'image/jpeg')),
+    numericInput('fovx', 'Horizontal field of view (º)', 54.4, min = 1, max = 180, width = '40%'),
+    numericInput('fovy', 'Vertical field of view (º)', 42.2, min = 1, max = 180, width = '40%'),
+    fileInput("myFile", "Choose image file", multiple = TRUE, accept = c('image/png', 'image/jpeg')),
+    tags$h3("Current Validation Point:"),
     verbatimTextOutput("accuracy"),
-    actionButton("Accept", "Accept Point"),
+    actionButton("Accept", "Save Validation Point to Table ↓"),
     headerPanel(""),
     tableOutput('table'),
     downloadButton("downloadData", "Download")
@@ -19,7 +22,17 @@ ui <- pageWithSidebar(
 server <- function(input, output, session) {
   values <- reactiveValues(acc_table = tibble(image_id = "", distance_pixels = NA, error_degrees = NA),
                            img_list = "./images/355.jpg",
-                           curr_file_name = "test_image")
+                           curr_file_name = "test_image",
+                           fov_x = 54.4,
+                           fov_y = 42.2)
+  
+  observeEvent(input$fovx, {
+    values$fov_x = input$fovx
+  })
+  
+  observeEvent(input$fovy, {
+    values$fov_y = input$fovy
+  })
   
   observeEvent(input$myFile, {
     inFile <- input$myFile
@@ -32,13 +45,13 @@ server <- function(input, output, session) {
   xy_dist <- function(e) {
     if(is.null(e)) return(list(dist_px = NA, acc_deg = NA))
     dist_px <- sqrt((e$xmin-e$xmax)^2 + (e$ymin-e$ymax)^2)
-    fov_x <- 101.55
-    fov_y <- 73.6
+    # fov_x <- 101.55
+    # fov_y <- 73.6
     fov_res_x <- 640
     fov_res_y <- 480
     
-    to_degreesx = fov_res_x/fov_x
-    to_degreesy = fov_res_y/fov_y
+    to_degreesx = fov_res_x/values$fov_x
+    to_degreesy = fov_res_y/values$fov_y
     dist_x_deg <- (e$xmax-e$xmin) / to_degreesx
     dist_y_deg <- (e$ymax-e$ymin) / to_degreesy
     
@@ -64,8 +77,8 @@ server <- function(input, output, session) {
   
   output$accuracy <- renderText({
     acc_output <- xy_dist(input$plot_brush)
-    paste("dist (px): ", as.character(round(acc_output$dist_px, 1)),
-          "\nerror (º): ", as.character(round(acc_output$acc_deg, 1)))
+    paste("Raw Distance (pixels): ", as.character(round(acc_output$dist_px, 1)),
+          "\nOffset Error (º): ", as.character(round(acc_output$acc_deg, 1)))
 
   })
   
