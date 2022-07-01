@@ -1,8 +1,9 @@
 library(shiny)
 library(tidyverse)
 
-ui <- pageWithSidebar(
-  headerPanel("Eye-tracking accuracy tool"),
+ui <- fluidPage(
+  headerPanel("Eye-Tracking Accuracy Calculator"),
+  h5("Directions: First, enter the horizontal and vertical field of view in degrees for your eye tracker scene camera."),
   sidebarPanel(
     numericInput('fovx', 'Horizontal field of view (º)', 54.4, min = 1, max = 180, width = '40%'),
     numericInput('fovy', 'Vertical field of view (º)', 42.2, min = 1, max = 180, width = '40%'),
@@ -15,13 +16,17 @@ ui <- pageWithSidebar(
     downloadButton("downloadData", "Download")
   ),
   mainPanel(
-    imageOutput("preImage", brush = "plot_brush"),
+    imageOutput("preImage", brush = "plot_brush", width = "640px", height = "520px"),
+  ),
+  fluidRow(
+    h4("Author: John Franchak"),
+    h5("Last Updated: 7/1/2022"),
   )
 )
 
 server <- function(input, output, session) {
   values <- reactiveValues(acc_table = tibble(image_id = "", distance_pixels = NA, error_degrees = NA),
-                           img_list = "./images/355.jpg",
+                           img_list = "./images/356.jpg",
                            curr_file_name = "test_image",
                            fov_x = 54.4,
                            fov_y = 42.2)
