@@ -3,10 +3,10 @@ library(tidyverse)
 
 ui <- fluidPage(
   headerPanel("Eye-Tracking Accuracy Calculator"),
-  h5("Directions: First, enter the horizontal and vertical field of view in degrees for your eye tracker scene camera."),
+  # h5("Directions: First, enter the horizontal and vertical field of view in degrees for your eye tracker scene camera."),
   sidebarPanel(
-    numericInput('fovx', 'Horizontal field of view (º)', 54.4, min = 1, max = 180, width = '40%'),
-    numericInput('fovy', 'Vertical field of view (º)', 42.2, min = 1, max = 180, width = '40%'),
+    numericInput('fovx', 'Horizontal field of view (º)', 54.4, min = 1, max = 180, width = '60%'),
+    numericInput('fovy', 'Vertical field of view (º)', 42.2, min = 1, max = 180, width = '60%'),
     fileInput("myFile", "Choose image file", multiple = TRUE, accept = c('image/png', 'image/jpeg')),
     tags$h3("Current Validation Point:"),
     verbatimTextOutput("accuracy"),
