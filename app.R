@@ -7,7 +7,9 @@ ui <- pageWithSidebar(
   sidebarPanel(
     fileInput("myFile", "Choose a file", accept = c('image/png', 'image/jpeg')),
     verbatimTextOutput("accuracy"),
-    actionButton("Accept", "Accept Point")
+    actionButton("Accept", "Accept Point"),
+    tableOutput('table'),
+    downloadButton("downloadData", "Download")
   ),
   mainPanel(
     imageOutput("preImage", brush = "plot_brush"),
@@ -17,7 +19,7 @@ ui <- pageWithSidebar(
     headerPanel(""),
     headerPanel(""),
     headerPanel(""),
-    tableOutput('table')
+    
   )
 )
 
@@ -72,13 +74,20 @@ server <- function(input, output, session) {
   output$table <- renderTable(values$acc_table)
   
   output$accuracy <- renderText({
-    
     acc_output <- xy_dist(input$plot_brush)
-    
     paste("dist (px): ", as.character(round(acc_output$dist_px, 1)),
           "\nerror (º): ", as.character(round(acc_output$acc_deg, 1)))
 
   })
+  
+  output$downloadData <- downloadHandler(
+    filename = function() {
+      paste("et_calibration_output.csv", sep = "")
+    },
+    content = function(file) {
+      write.csv(values$acc_table, file, row.names = TRUE)
+    }
+  )
 }
 
 # Run the application 
