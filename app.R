@@ -1,29 +1,21 @@
 library(shiny)
 library(tidyverse)
 
-# Define UI for application that draws a histogram
 ui <- pageWithSidebar(
   headerPanel("Eye-tracking accuracy tool"),
   sidebarPanel(
     fileInput("myFile", "Choose a file", accept = c('image/png', 'image/jpeg')),
     verbatimTextOutput("accuracy"),
     actionButton("Accept", "Accept Point"),
+    headerPanel(""),
     tableOutput('table'),
     downloadButton("downloadData", "Download")
   ),
   mainPanel(
     imageOutput("preImage", brush = "plot_brush"),
-    headerPanel(""),
-    headerPanel(""),
-    headerPanel(""),
-    headerPanel(""),
-    headerPanel(""),
-    headerPanel(""),
-    
   )
 )
 
-# Define server logic required to draw a histogram
 server <- function(input, output, session) {
   values <- reactiveValues(acc_table = tibble(image_id = "", distance_pixels = NA, error_degrees = NA),
                            img_list = "./images/355.jpg",
@@ -54,11 +46,6 @@ server <- function(input, output, session) {
     list(dist_px = dist_px, acc_deg = acc_deg)
   }
   
-  # output$preImage <- renderImage({
-  #   filename <- normalizePath(file.path('./images/355.jpg'))
-  #   list(src = img_list, width = 640, height = 480)
-  # }, deleteFile = FALSE)
-  
   output$preImage <- renderImage({
     filename <- normalizePath(file.path(values$img_list))
     list(src = filename, width = 640, height = 480)
@@ -67,8 +54,10 @@ server <- function(input, output, session) {
   observeEvent(input$Accept, {
     acc_output <- xy_dist(input$plot_brush)
     values$acc_table <- bind_rows(values$acc_table, 
-                           tibble(image_id = values$curr_file_name, distance_pixels = acc_output$dist_px, error_degrees = acc_output$acc_deg)) %>% 
-      drop_na(error_degrees)
+                           tibble(image_id = values$curr_file_name, 
+                                  distance_pixels = acc_output$dist_px, 
+                                  error_degrees = acc_output$acc_deg)) %>% 
+                          drop_na(error_degrees)
   })
   
   output$table <- renderTable(values$acc_table)
