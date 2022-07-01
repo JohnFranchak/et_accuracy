@@ -7,7 +7,7 @@ ui <- pageWithSidebar(
   sidebarPanel(
     fileInput("myFile", "Choose a file", accept = c('image/png', 'image/jpeg')),
     verbatimTextOutput("accuracy"),
-    actionButton("do", "Accept Point")
+    actionButton("Accept", "Accept Point")
   ),
   mainPanel(
     imageOutput("preImage", brush = "plot_brush"),
@@ -24,13 +24,15 @@ ui <- pageWithSidebar(
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
   values <- reactiveValues(acc_table = tibble(image_id = "", distance_pixels = NA, error_degrees = NA),
-                           img_list = "./images/355.jpg")
+                           img_list = "./images/355.jpg",
+                           curr_file_name = "test_image")
   
   observeEvent(input$myFile, {
     inFile <- input$myFile
     if (is.null(inFile))
       return()
     values$img_list = inFile$datapath
+    values$curr_file_name <- inFile$name
   })
   
   xy_dist <- function(e) {
@@ -60,10 +62,10 @@ server <- function(input, output, session) {
     list(src = filename, width = 640, height = 480)
   }, deleteFile = FALSE)
   
-  observeEvent(input$do, {
+  observeEvent(input$Accept, {
     acc_output <- xy_dist(input$plot_brush)
     values$acc_table <- bind_rows(values$acc_table, 
-                           tibble(image_id = "", distance_pixels = acc_output$dist_px, error_degrees = acc_output$acc_deg)) %>% 
+                           tibble(image_id = values$curr_file_name, distance_pixels = acc_output$dist_px, error_degrees = acc_output$acc_deg)) %>% 
       drop_na(error_degrees)
   })
   
