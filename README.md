@@ -18,6 +18,7 @@ What you need:
 - The **field of view** (in degrees) for the horizontal and vertical axes of your eye tracker's scene camera. This should be provided from the manufacturer. Not all scene cameras from the same manufacturer will have the same field of view (e.g., Positive Science sells standard and wide-angle scene cameras). It's critical to get the correct field of view, otherwise the pixels-to-degrees calculation will be incorrect.
 - **Validation image files** that have a rendered point-of-gaze estimate (crosshair, bullseye, etc.) at moments where the participant is fixating a known target. The app opens up with an example image. Validation images can be exported from a rendered eye tracking video using ffmpeg, VLC, or a third-party video-to-frame tool. Screenshots will not yield an accurate result because the dimension of the screenshot won't perfectly match the dimension of the point-of-gaze video. 
 
+What you do:
 1. [Open the app](https://john-franchak.shinyapps.io/Eye-Tracking-Accuracy-Calculator/)
 2. Enter the horizontal and vertical field of view in degrees
 3. Use the file browser to upload a validation image
