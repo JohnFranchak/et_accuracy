@@ -5,7 +5,7 @@ library(tidyverse)
 ui <- pageWithSidebar(
   headerPanel("Eye-tracking accuracy tool"),
   sidebarPanel(
-    fileInput("files", "Upload", multiple = TRUE, accept = c(".jpg", ".jpeg", ".png")),
+    fileInput("myFile", "Choose a file", accept = c('image/png', 'image/jpeg')),
     verbatimTextOutput("accuracy"),
     actionButton("do", "Accept Point")
   ),
@@ -23,25 +23,19 @@ ui <- pageWithSidebar(
 
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
-  values <- reactiveValues(acc_table = tibble(image_id = "", distance_pixels = NA, error_degrees = NA))
+  values <- reactiveValues(acc_table = tibble(image_id = "", distance_pixels = NA, error_degrees = NA),
+                           img_list = "./images/355.jpg")
   
-  img_list <- reactive({
-    validate(need(input$files != "", "select files..."))
-    
-    if (is.null(input$files)) {
-      return(NULL)
-    } else {
-      
-      path_list <- as.list(input$files$datapath)
-      return(path_list)
-    }
+  observeEvent(input$myFile, {
+    inFile <- input$myFile
+    if (is.null(inFile))
+      return()
+    values$img_list = inFile$datapath
   })
   
   xy_dist <- function(e) {
     if(is.null(e)) return(list(dist_px = NA, acc_deg = NA))
-    
     dist_px <- sqrt((e$xmin-e$xmax)^2 + (e$ymin-e$ymax)^2)
-    
     fov_x <- 101.55
     fov_y <- 73.6
     fov_res_x <- 640
@@ -49,17 +43,20 @@ server <- function(input, output, session) {
     
     to_degreesx = fov_res_x/fov_x
     to_degreesy = fov_res_y/fov_y
-    
     dist_x_deg <- (e$xmax-e$xmin) / to_degreesx
     dist_y_deg <- (e$ymax-e$ymin) / to_degreesy
     
     acc_deg <- sqrt(dist_x_deg^2 + dist_y_deg^2)
-    
     list(dist_px = dist_px, acc_deg = acc_deg)
   }
   
+  # output$preImage <- renderImage({
+  #   filename <- normalizePath(file.path('./images/355.jpg'))
+  #   list(src = img_list, width = 640, height = 480)
+  # }, deleteFile = FALSE)
+  
   output$preImage <- renderImage({
-    filename <- normalizePath(file.path('./images/355.jpg'))
+    filename <- normalizePath(file.path(values$img_list))
     list(src = filename, width = 640, height = 480)
   }, deleteFile = FALSE)
   
