@@ -7,12 +7,15 @@ ui <- fluidPage(
     numericInput('fovx', 'Horizontal field of view (º)', 54.4, min = 1, max = 180, width = '60%'),
     numericInput('fovy', 'Vertical field of view (º)', 42.2, min = 1, max = 180, width = '60%'),
     fileInput("myFile", "Choose image file", multiple = TRUE, accept = c('image/png', 'image/jpeg')),
-    tags$h3("Current Validation Point:"),
+    tags$h6("To measure accuracy, click and drag between point of gaze and validation target. The accuracy of the current selection will show in the box below. Click the 'save to table' button to add it to your list to export."),
+    headerPanel(""),
+    tags$h4("Current Validation Point Accuracy:"),
     verbatimTextOutput("accuracy"),
     actionButton("Accept", "Save Validation Point to Table ↓"),
     headerPanel(""),
     tableOutput('table'),
-    downloadButton("downloadData", "Download")
+    downloadButton("downloadData", "Download"), 
+    actionButton("reset", "Reset Everything")
   ),
   mainPanel(
     imageOutput("preImage", brush = "plot_brush", width = "640px", height = "520px"),
@@ -78,6 +81,14 @@ server <- function(input, output, session) {
   })
   
   output$table <- renderTable(values$acc_table)
+  
+  observeEvent(input$reset, {
+    values$acc_table = tibble(image_id = "", distance_pixels = NA, error_degrees = NA)
+    values$img_list = "./images/356.jpg"
+    values$curr_file_name = "test_image"
+    values$fov_x = 54.4
+    values$fov_y = 42.2
+  })
   
   output$accuracy <- renderText({
     acc_output <- xy_dist(input$plot_brush)
