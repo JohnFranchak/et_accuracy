@@ -1,5 +1,8 @@
 library(shiny)
 library(tidyverse)
+library(reactable)
+
+acc_table  <-  tibble(image_id = "", distance_pixels = NA, error_degrees = NA)
 
 ui <- fluidPage(
   headerPanel("Eye-Tracking Accuracy Calculator"),
@@ -13,12 +16,12 @@ ui <- fluidPage(
     verbatimTextOutput("accuracy"),
     actionButton("Accept", "Save Validation Point to Table ↓"),
     headerPanel(""),
-    tableOutput('table'),
-    downloadButton("downloadData", "Download"), 
-    actionButton("reset", "Reset Everything")
+    downloadButton("downloadData", "Download", class = "btn-success"), 
+    actionButton("reset", "Reset Everything", class = "btn-danger")
   ),
   mainPanel(
     imageOutput("preImage", brush = "plot_brush", width = "640px", height = "520px"),
+    reactableOutput('table'),
   ),
   fluidRow(
     h5("Author: John Franchak"),
@@ -27,7 +30,7 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session) {
-  values <- reactiveValues(acc_table = tibble(image_id = "", distance_pixels = NA, error_degrees = NA),
+  values <- reactiveValues(
                            img_list = "./images/356.jpg",
                            curr_file_name = "test_image",
                            fov_x = 54.4,
@@ -73,21 +76,25 @@ server <- function(input, output, session) {
   
   observeEvent(input$Accept, {
     acc_output <- xy_dist(input$plot_brush)
-    values$acc_table <- bind_rows(values$acc_table, 
-                           tibble(image_id = values$curr_file_name, 
-                                  distance_pixels = acc_output$dist_px, 
-                                  error_degrees = acc_output$acc_deg)) %>% 
-                          drop_na(error_degrees)
+    acc_table <- bind_rows(acc_table, 
+                                  tibble(image_id = values$curr_file_name, 
+                                         distance_pixels = acc_output$dist_px, 
+                                         error_degrees = acc_output$acc_deg)) %>% 
+      drop_na(error_degrees)
+    updateReactable("table", data = acc_table)
   })
   
-  output$table <- renderTable(values$acc_table)
+  output$table <- renderReactable({
+    reactable(acc_table)
+  })
   
   observeEvent(input$reset, {
-    values$acc_table = tibble(image_id = "", distance_pixels = NA, error_degrees = NA)
+    acc_table = tibble(image_id = "", distance_pixels = NA, error_degrees = NA)
     values$img_list = "./images/356.jpg"
     values$curr_file_name = "test_image"
     values$fov_x = 54.4
     values$fov_y = 42.2
+    updateReactable("table", data = acc_table)
   })
   
   output$accuracy <- renderText({
