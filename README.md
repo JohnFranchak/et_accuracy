@@ -5,11 +5,7 @@ Author: John Franchak
 
 [https://john-franchak.shinyapps.io/Eye-Tracking-Accuracy-Calculator/](https://john-franchak.shinyapps.io/Eye-Tracking-Accuracy-Calculator/) 
 
-If you use this tool in a paper, please cite it as: 
-
-Franchak, J. (2022). Eye Tracking Accuracy Calculator (Version 0.0.1) [Computer software] 
-
-**Shinapps.io version**. My current account limits the number of hours/month that the app can be used. I'm working on a hosting solution, but I recommend for now that you download the repository and run the shiny app locally from RStudio. Simply open the .RProj file, install any needed packages, and then click on the "Run App" button—it will run locally on your own computer without any limits.
+If you use this tool in a paper, please cite it as: Franchak, J. (2022). Eye Tracking Accuracy Calculator (Version 0.0.1) [Computer software] 
 
 ### Status of tool
 
@@ -20,6 +16,8 @@ More features are planned to improve the usability of the app:
 - Keyboard shortcuts
 - Better handling of larger resolution files
 - Visualizing calibration on previously-coded frames
+
+**Shinapps.io version**. My current account limits the number of hours/month that the app can be used. I'm working on a hosting solution, but I recommend for now that you download the repository and run the shiny app locally from RStudio. Simply open the .RProj file, install any needed packages, and then click on the "Run App" button—it will run locally on your own computer without any limits.
 
 ### How to use the calculator
 
