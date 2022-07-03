@@ -34,6 +34,7 @@ ui <- fluidPage(
   mainPanel(
     imageOutput("preImage", brush = "plot_brush", width = "640px", height = "520px"),
     actionButton("previous_img", "Previous Image"),
+    actionButton("save_advance", "Save Validation and Advance"),
     actionButton("next_img", "Next Image"),
   ),
 )
@@ -123,6 +124,15 @@ server <- function(input, output, session) {
   
   observeEvent(input$previous_img, {
     values$img_current <- ifelse(values$img_current <= 1, 1, values$img_current - 1)
+    updateReactable("table", selected = values$img_current)
+  })
+  
+  observeEvent(input$save_advance, {
+    acc_output <- xy_dist(input$plot_brush)
+    values$acc_table[values$img_current, "distance_pixels"] <- acc_output$dist_px
+    values$acc_table[values$img_current, "error_degrees"] <- acc_output$acc_deg
+    updateReactable("table", data = values$acc_table)
+    values$img_current <- ifelse(values$img_current >= nrow(values$acc_table), nrow(values$acc_table), values$img_current + 1)
     updateReactable("table", selected = values$img_current)
   })
   
