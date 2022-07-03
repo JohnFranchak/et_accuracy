@@ -80,7 +80,7 @@ server <- function(input, output, session) {
   }, deleteFile = FALSE)
   
   observe({
-    values$img_current <- ifelse(is.na(selected()), values$img_current, selected())
+    values$img_current <- ifelse(length(selected()) < 1, values$img_current, selected())
   })
   
   observeEvent(input$Accept, {
