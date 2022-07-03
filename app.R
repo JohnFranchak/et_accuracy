@@ -7,7 +7,7 @@ ui <- fluidPage(
   sidebarPanel(
     numericInput('fovx', 'Horizontal field of view (º)', 54.4, min = 1, max = 180, width = '60%'),
     numericInput('fovy', 'Vertical field of view (º)', 42.2, min = 1, max = 180, width = '60%'),
-    fileInput("myFile", "Choose image file", multiple = TRUE, accept = c('image/png', 'image/jpeg')),
+    fileInput("myFile", "Choose image files", multiple = TRUE, accept = c('image/png', 'image/jpeg')),
     tags$h6("To measure accuracy, click and drag between point of gaze and validation target. The accuracy of the current selection will show in the box below. Click the 'save to table' button to add it to your list to export."),
     headerPanel(""),
     tags$h4("Current Validation Point Accuracy:"),
@@ -30,8 +30,8 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session) {
-  values <- reactiveValues(acc_table  =  tibble(image_id = "", distance_pixels = NA, error_degrees = NA),
-                           img_list = c("./images/356.jpg","./images/357.jpg","./images/358.jpg"),
+  values <- reactiveValues(img_list = c("./images/356.jpg","./images/357.jpg","./images/358.jpg"),
+                           acc_table  =  tibble(image_id = img_list, distance_pixels = NA, error_degrees = NA),
                            img_current = "./images/356.jpg",
                            curr_file_name = "test_image",
                            fov_x = 54.4,
@@ -54,6 +54,7 @@ server <- function(input, output, session) {
     values$img_list = inFile$datapath
     values$img_current = values$img_list[1]
     values$curr_file_name <- inFile$name
+    values$acc_table <- tibble(image_id = values$img_list, distance_pixels = NA, error_degrees = NA)
   })
   
   xy_dist <- function(e) {
@@ -85,7 +86,7 @@ server <- function(input, output, session) {
   observeEvent(input$Accept, {
     acc_output <- xy_dist(input$plot_brush)
     values$acc_table <- bind_rows(values$acc_table, 
-                                  tibble(image_id = values$curr_file_name, 
+                                  tibble(image_id = values$curr_file_name[selected()], 
                                          distance_pixels = acc_output$dist_px, 
                                          error_degrees = acc_output$acc_deg)) %>% 
       drop_na(error_degrees)
