@@ -5,28 +5,32 @@ library(reactable)
 ui <- fluidPage(
   headerPanel("Eye-Tracking Accuracy Calculator"),
   sidebarPanel(
-    numericInput('fovx', 'Horizontal field of view (º)', 54.4, min = 1, max = 180, width = '60%'),
-    numericInput('fovy', 'Vertical field of view (º)', 42.2, min = 1, max = 180, width = '60%'),
-    fileInput("myFile", "Choose image files", multiple = TRUE, accept = c('image/png', 'image/jpeg')),
-    tags$h6("To measure accuracy, click and drag between point of gaze and validation target. The accuracy of the current selection will show in the box below. Click the 'save to table' button to add it to your list to export."),
-    headerPanel(""),
-    tags$h4("Current Validation Point Accuracy:"),
-    verbatimTextOutput("accuracy"),
-    actionButton("Accept", "Save Validation Point to Table ↓"),
-    headerPanel(""),
-    reactableOutput('table', inline = TRUE, width = "100%"),
-    br(),
-    br(),
-    downloadButton("downloadData", "Download", class = "btn-success"), 
-    actionButton("reset", "Reset Everything", class = "btn-danger")
-  ),
+    tabsetPanel(type = "tabs",
+                tabPanel("Setup",  
+                         br(),
+                         numericInput('fovx', 'Horizontal field of view (º)', 54.4, min = 1, max = 180, width = '60%'),
+                         numericInput('fovy', 'Vertical field of view (º)', 42.2, min = 1, max = 180, width = '60%'),
+                         fileInput("myFile", "Choose image files", multiple = TRUE, accept = c('image/png', 'image/jpeg')),
+                         tags$h6("To measure accuracy, click and drag between point of gaze and validation target. The accuracy of the current selection will show in the box below. Click the 'save to table' button to add it to your list to export."),
+                         h5("Author: John Franchak"),
+                         a("Github Page and Instructions", href = "https://github.com/JohnFranchak/et_accuracy")
+                         ),
+                tabPanel("Measure Accuracy",
+                         br(),
+                         tags$h4("Current Validation Point Accuracy:"),
+                         verbatimTextOutput("accuracy"),
+                         actionButton("Accept", "Save Validation Point to Table ↓"),
+                         headerPanel(""),
+                         reactableOutput('table', inline = TRUE, width = "100%"),
+                         br(),
+                         br(),
+                         downloadButton("downloadData", "Download", class = "btn-success"), 
+                         actionButton("reset", "Reset Everything", class = "btn-danger")
+                         )
+    )),
   mainPanel(
     imageOutput("preImage", brush = "plot_brush", width = "640px", height = "520px"),
   ),
-  fluidRow(
-    h5("Author: John Franchak"),
-    a("Github Page and Instructions", href = "https://github.com/JohnFranchak/et_accuracy"),
-  )
 )
 
 server <- function(input, output, session) {
@@ -95,6 +99,7 @@ server <- function(input, output, session) {
   output$table <- renderReactable({
     reactable(values$acc_table, selection = "single", onClick = "select",
               bordered = TRUE, highlight = TRUE, wrap = FALSE, compact = TRUE,
+              showPageSizeOptions = TRUE,
               columns = list(
                 img_name = colDef(name = "Image"),
                 image_id = colDef(show = FALSE),
