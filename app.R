@@ -16,6 +16,7 @@ ui <- fluidPage(
     headerPanel(""),
     reactableOutput('table', inline = TRUE, width = "100%"),
     br(),
+    br(),
     downloadButton("downloadData", "Download", class = "btn-success"), 
     actionButton("reset", "Reset Everything", class = "btn-danger")
   ),
@@ -86,7 +87,12 @@ server <- function(input, output, session) {
   })
   
   output$table <- renderReactable({
-    reactable(values$acc_table, selection = "single", onClick = "select")
+    reactable(values$acc_table, selection = "single", onClick = "select",
+              bordered = TRUE, highlight = TRUE, wrap = FALSE, compact = TRUE,
+              columns = list(
+                image_id = colDef(name = "Image"),
+                distance_pixels = colDef(name = "Raw Distance", format = colFormat(suffix = " pixels", digits = 2)),
+                error_degrees = colDef(name = "Error", format = colFormat(suffix = "º", digits = 2))))
   })
   
   observeEvent(input$reset, {
