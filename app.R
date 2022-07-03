@@ -33,6 +33,8 @@ ui <- fluidPage(
     )),
   mainPanel(
     imageOutput("preImage", brush = "plot_brush", width = "640px", height = "520px"),
+    actionButton("previous_img", "Previous Image"),
+    actionButton("next_img", "Next Image"),
   ),
 )
 
@@ -116,6 +118,16 @@ server <- function(input, output, session) {
     values$fov_x = 54.4
     values$fov_y = 42.2
     updateReactable("table", data = values$acc_table)
+    updateReactable("table", selected = values$img_current)
+  })
+  
+  observeEvent(input$previous_img, {
+    values$img_current <- ifelse(values$img_current <= 1, 1, values$img_current - 1)
+    updateReactable("table", selected = values$img_current)
+  })
+  
+  observeEvent(input$next_img, {
+    values$img_current <- ifelse(values$img_current >= nrow(values$acc_table), nrow(values$acc_table), values$img_current + 1)
     updateReactable("table", selected = values$img_current)
   })
   
