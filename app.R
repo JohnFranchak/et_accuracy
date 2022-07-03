@@ -34,11 +34,11 @@ server <- function(input, output, session) {
     if (is.null(inFile)) {
       t <- tibble(image_id = c("./images/356.jpg","./images/357.jpg","./images/358.jpg"), 
                     img_name = c("test_image1", "test_image2", "test_image3"),
-                    distance_pixels = NA, error_degrees = NA)
+                  error_degrees = NA, distance_pixels = NA,)
     } else{
       tibble(image_id = inFile$datapath, 
              img_name = inFile$name,
-             distance_pixels = NA, error_degrees = NA)
+             error_degrees = NA, distance_pixels = NA)
     }
   }
   
@@ -72,6 +72,7 @@ server <- function(input, output, session) {
       return()
     values$acc_table <- initialize_acc_table(inFile)
     values$img_current = 1
+    updateReactable("table", selected = values$img_current)
   })
   
   output$preImage <- renderImage({
@@ -88,6 +89,7 @@ server <- function(input, output, session) {
     values$acc_table[values$img_current, "distance_pixels"] <- acc_output$dist_px
     values$acc_table[values$img_current, "error_degrees"] <- acc_output$acc_deg
     updateReactable("table", data = values$acc_table)
+    updateReactable("table", selected = values$img_current)
   })
   
   output$table <- renderReactable({
@@ -96,8 +98,8 @@ server <- function(input, output, session) {
               columns = list(
                 img_name = colDef(name = "Image"),
                 image_id = colDef(show = FALSE),
-                distance_pixels = colDef(name = "Raw Distance", format = colFormat(suffix = " pixels", digits = 2)),
-                error_degrees = colDef(name = "Error", format = colFormat(suffix = "º", digits = 2))))
+                error_degrees = colDef(name = "Error", format = colFormat(suffix = "º", digits = 2)),
+                distance_pixels = colDef(name = "Raw Distance", format = colFormat(suffix = " pixels", digits = 2))))
   })
   
   observeEvent(input$reset, {
@@ -106,6 +108,7 @@ server <- function(input, output, session) {
     values$fov_x = 54.4
     values$fov_y = 42.2
     updateReactable("table", data = values$acc_table)
+    updateReactable("table", selected = values$img_current)
   })
   
   output$accuracy <- renderText({
