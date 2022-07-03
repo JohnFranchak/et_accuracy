@@ -31,7 +31,8 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   values <- reactiveValues(acc_table  =  tibble(image_id = "", distance_pixels = NA, error_degrees = NA),
-                           img_list = "./images/356.jpg",
+                           img_list = c("./images/356.jpg","./images/357.jpg","./images/358.jpg"),
+                           img_current = "./images/356.jpg",
                            curr_file_name = "test_image",
                            fov_x = 54.4,
                            fov_y = 42.2)
@@ -51,6 +52,7 @@ server <- function(input, output, session) {
     if (is.null(inFile))
       return()
     values$img_list = inFile$datapath
+    values$img_current = values$img_list[1]
     values$curr_file_name <- inFile$name
   })
   
@@ -72,9 +74,13 @@ server <- function(input, output, session) {
   }
   
   output$preImage <- renderImage({
-    filename <- normalizePath(file.path(values$img_list))
+    filename <- normalizePath(file.path(values$img_current))
     list(src = filename, width = 640, height = 480)
   }, deleteFile = FALSE)
+  
+  observe({
+    values$img_current <- values$img_list[selected()]
+  })
   
   observeEvent(input$Accept, {
     acc_output <- xy_dist(input$plot_brush)
@@ -97,7 +103,8 @@ server <- function(input, output, session) {
   
   observeEvent(input$reset, {
     values$acc_table = tibble(image_id = "", distance_pixels = NA, error_degrees = NA)
-    values$img_list = "./images/356.jpg"
+    values$img_list = c("./images/356.jpg","./images/357.jpg","./images/358.jpg")
+    values$img_current = values$img_list[1]
     values$curr_file_name = "test_image"
     values$fov_x = 54.4
     values$fov_y = 42.2
