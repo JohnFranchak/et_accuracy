@@ -5,7 +5,7 @@ Author: John Franchak
 
 [https://john-franchak.shinyapps.io/Eye-Tracking-Accuracy-Calculator/](https://john-franchak.shinyapps.io/Eye-Tracking-Accuracy-Calculator/) 
 
-If you use this tool in a paper, please cite it as: Franchak, J. (2022). Eye Tracking Accuracy Calculator (Version 0.0.1) [Computer software] 
+If you use this tool in a paper, please cite it as: Franchak, J. (2022). Eye Tracking Accuracy Calculator (Version 0.1) [Computer software] 
 
 ### Status of tool
 
