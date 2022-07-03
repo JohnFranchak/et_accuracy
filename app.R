@@ -6,14 +6,17 @@ ui <- fluidPage(
   headerPanel("Eye-Tracking Accuracy Calculator"),
   sidebarPanel(
     tabsetPanel(type = "tabs",
+                tabPanel("Instructions",
+                         h5("Author: John Franchak"),
+                         a("Github Page and Full Instructions", href = "https://github.com/JohnFranchak/et_accuracy"),
+                         tags$h5("Project Setup: Go to the setup tab to set the field of view of your eye tracker's scene camera (or the visual angle subtended by the remote eye tracker image). Next, use the file browser to upload a set of images to measure accuracy. Every time you upload images it will clear the work you did previously, so be sure to download your output before loading a new batch of images. Currently, image files greater than 640x480 may not load correctly and sets > 25 images at a time are not recommended."),
+                         tags$h5("Measure Accuracy: Click on a row in the table to select an image. To measure accuracy, click and drag between point of gaze and validation target. The accuracy of the current selection will show in the box below. Click the 'save to table' button to add it to your list to export. Use the download button to get a .csv of all the data you recorded.")
+                ),
                 tabPanel("Setup",  
                          br(),
                          numericInput('fovx', 'Horizontal field of view (º)', 54.4, min = 1, max = 180, width = '60%'),
                          numericInput('fovy', 'Vertical field of view (º)', 42.2, min = 1, max = 180, width = '60%'),
                          fileInput("myFile", "Choose image files", multiple = TRUE, accept = c('image/png', 'image/jpeg')),
-                         tags$h6("To measure accuracy, click and drag between point of gaze and validation target. The accuracy of the current selection will show in the box below. Click the 'save to table' button to add it to your list to export."),
-                         h5("Author: John Franchak"),
-                         a("Github Page and Instructions", href = "https://github.com/JohnFranchak/et_accuracy")
                          ),
                 tabPanel("Measure Accuracy",
                          br(),
