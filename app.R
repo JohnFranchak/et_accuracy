@@ -121,7 +121,8 @@ server <- function(input, output, session) {
   
   output$accuracy <- renderText({
     acc_output <- xy_dist(input$plot_brush)
-    paste("Raw Distance (pixels): ", as.character(round(acc_output$dist_px, 1)),
+    paste("File: ", values$acc_table$img_name[values$img_current],
+          "\nRaw Distance (pixels): ", as.character(round(acc_output$dist_px, 1)),
           "\nOffset Error (º): ", as.character(round(acc_output$acc_deg, 1)))
 
   })
