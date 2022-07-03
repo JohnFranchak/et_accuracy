@@ -30,66 +30,63 @@ ui <- fluidPage(
 )
 
 server <- function(input, output, session) {
-  values <- reactiveValues(img_list = c("./images/356.jpg","./images/357.jpg","./images/358.jpg"),
-                           acc_table  =  tibble(image_id = img_list, distance_pixels = NA, error_degrees = NA),
-                           img_current = "./images/356.jpg",
-                           curr_file_name = "test_image",
+  initialize_acc_table <- function(inFile){
+    if (is.null(inFile)) {
+      t <- tibble(image_id = c("./images/356.jpg","./images/357.jpg","./images/358.jpg"), 
+                    img_name = c("test_image1", "test_image2", "test_image3"),
+                    distance_pixels = NA, error_degrees = NA)
+    } else{
+      tibble(image_id = inFile$datapath, 
+             img_name = inFile$name,
+             distance_pixels = NA, error_degrees = NA)
+    }
+  }
+  
+  xy_dist <- function(e) {
+    if(is.null(e)) return(list(dist_px = NA, acc_deg = NA))
+    dist_px <- sqrt((e$xmin-e$xmax)^2 + (e$ymin-e$ymax)^2)
+    fov_res_x <- 640
+    fov_res_y <- 480
+    to_degreesx = fov_res_x/values$fov_x
+    to_degreesy = fov_res_y/values$fov_y
+    dist_x_deg <- (e$xmax-e$xmin) / to_degreesx
+    dist_y_deg <- (e$ymax-e$ymin) / to_degreesy
+    acc_deg <- sqrt(dist_x_deg^2 + dist_y_deg^2)
+    list(dist_px = dist_px, acc_deg = acc_deg)
+  }
+  
+  values <- reactiveValues(acc_table = initialize_acc_table(NULL),
+                           img_current = 1,
                            fov_x = 54.4,
                            fov_y = 42.2)
   
   selected <- reactive(getReactableState("table", "selected"))
   
-  observeEvent(input$fovx, {
-    values$fov_x = input$fovx
-  })
+  observeEvent(input$fovx, {values$fov_x = input$fovx})
   
-  observeEvent(input$fovy, {
-    values$fov_y = input$fovy
-  })
+  observeEvent(input$fovy, {values$fov_y = input$fovy})
   
   observeEvent(input$myFile, {
     inFile <- input$myFile
     if (is.null(inFile))
       return()
-    values$img_list = inFile$datapath
-    values$img_current = values$img_list[1]
-    values$curr_file_name <- inFile$name
-    values$acc_table <- tibble(image_id = values$img_list, distance_pixels = NA, error_degrees = NA)
+    values$acc_table <- initialize_acc_table(inFile)
+    values$img_current = 1
   })
   
-  xy_dist <- function(e) {
-    if(is.null(e)) return(list(dist_px = NA, acc_deg = NA))
-    dist_px <- sqrt((e$xmin-e$xmax)^2 + (e$ymin-e$ymax)^2)
-    # fov_x <- 101.55
-    # fov_y <- 73.6
-    fov_res_x <- 640
-    fov_res_y <- 480
-    
-    to_degreesx = fov_res_x/values$fov_x
-    to_degreesy = fov_res_y/values$fov_y
-    dist_x_deg <- (e$xmax-e$xmin) / to_degreesx
-    dist_y_deg <- (e$ymax-e$ymin) / to_degreesy
-    
-    acc_deg <- sqrt(dist_x_deg^2 + dist_y_deg^2)
-    list(dist_px = dist_px, acc_deg = acc_deg)
-  }
-  
   output$preImage <- renderImage({
-    filename <- normalizePath(file.path(values$img_current))
+    filename <- normalizePath(file.path(values$acc_table$image_id[values$img_current]))
     list(src = filename, width = 640, height = 480)
   }, deleteFile = FALSE)
   
   observe({
-    values$img_current <- values$img_list[selected()]
+    values$img_current <- ifelse(is.na(selected()), values$img_current, selected())
   })
   
   observeEvent(input$Accept, {
     acc_output <- xy_dist(input$plot_brush)
-    values$acc_table <- bind_rows(values$acc_table, 
-                                  tibble(image_id = values$curr_file_name[selected()], 
-                                         distance_pixels = acc_output$dist_px, 
-                                         error_degrees = acc_output$acc_deg)) %>% 
-      drop_na(error_degrees)
+    values$acc_table[values$img_current, "distance_pixels"] <- acc_output$dist_px
+    values$acc_table[values$img_current, "error_degrees"] <- acc_output$acc_deg
     updateReactable("table", data = values$acc_table)
   })
   
@@ -97,16 +94,15 @@ server <- function(input, output, session) {
     reactable(values$acc_table, selection = "single", onClick = "select",
               bordered = TRUE, highlight = TRUE, wrap = FALSE, compact = TRUE,
               columns = list(
-                image_id = colDef(name = "Image"),
+                img_name = colDef(name = "Image"),
+                image_id = colDef(show = FALSE),
                 distance_pixels = colDef(name = "Raw Distance", format = colFormat(suffix = " pixels", digits = 2)),
                 error_degrees = colDef(name = "Error", format = colFormat(suffix = "º", digits = 2))))
   })
   
   observeEvent(input$reset, {
-    values$acc_table = tibble(image_id = "", distance_pixels = NA, error_degrees = NA)
-    values$img_list = c("./images/356.jpg","./images/357.jpg","./images/358.jpg")
-    values$img_current = values$img_list[1]
-    values$curr_file_name = "test_image"
+    values$acc_table = initialize_acc_table(NULL)
+    values$img_current = 1
     values$fov_x = 54.4
     values$fov_y = 42.2
     updateReactable("table", data = values$acc_table)
