@@ -1,6 +1,7 @@
 library(shiny)
 library(tidyverse)
 library(reactable)
+library(readbitmap)
 
 ui <- fluidPage(
   headerPanel("Eye-Tracking Accuracy Calculator"),
@@ -9,7 +10,7 @@ ui <- fluidPage(
                 tabPanel("Instructions",
                          h5("Author: John Franchak"),
                          a("Github Page and Full Instructions", href = "https://github.com/JohnFranchak/et_accuracy"),
-                         tags$h5("Project Setup: Go to the setup tab to set the field of view of your eye tracker's scene camera (or the visual angle subtended by the remote eye tracker image). Next, use the file browser to upload a set of images to measure accuracy. Every time you upload images it will clear the work you did previously, so be sure to download your output before loading a new batch of images. Currently, image files greater than 640x480 may not load correctly and sets > 25 images at a time are not recommended."),
+                         tags$h5("Project Setup: Go to the setup tab to set the field of view of your eye tracker's scene camera (or the visual angle subtended by the remote eye tracker image). Next, use the file browser to upload a set of images to measure accuracy. Every time you upload images it will clear the work you did previously, so be sure to download your output before loading a new batch of images. Currently, image sets > 25 images are not recommended."),
                          tags$h5("Measure Accuracy: Click on a row in the table to select an image. To measure accuracy, click and drag between point of gaze and validation target. The accuracy of the current selection will show in the box below. Click the 'save to table' button to add it to your list to export. Use the download button to get a .csv of all the data you recorded.")
                 ),
                 tabPanel("Setup",  
@@ -55,10 +56,8 @@ server <- function(input, output, session) {
   xy_dist <- function(e) {
     if(is.null(e)) return(list(dist_px = NA, acc_deg = NA))
     dist_px <- sqrt((e$xmin-e$xmax)^2 + (e$ymin-e$ymax)^2)
-    fov_res_x <- 640
-    fov_res_y <- 480
-    to_degreesx = fov_res_x/values$fov_x
-    to_degreesy = fov_res_y/values$fov_y
+    to_degreesx = values$fov_res_x/values$fov_x
+    to_degreesy = values$fov_res_y/values$fov_y
     dist_x_deg <- (e$xmax-e$xmin) / to_degreesx
     dist_y_deg <- (e$ymax-e$ymin) / to_degreesy
     acc_deg <- sqrt(dist_x_deg^2 + dist_y_deg^2)
@@ -68,12 +67,13 @@ server <- function(input, output, session) {
   values <- reactiveValues(acc_table = initialize_acc_table(NULL),
                            img_current = 1,
                            fov_x = 54.4,
-                           fov_y = 42.2)
+                           fov_y = 42.2,
+                           fov_res_x = 640,
+                           fov_res_y = 480)
   
   selected <- reactive(getReactableState("table", "selected"))
   
   observeEvent(input$fovx, {values$fov_x = input$fovx})
-  
   observeEvent(input$fovy, {values$fov_y = input$fovy})
   
   observeEvent(input$myFile, {
@@ -87,7 +87,11 @@ server <- function(input, output, session) {
   
   output$preImage <- renderImage({
     filename <- normalizePath(file.path(values$acc_table$image_id[values$img_current]))
-    list(src = filename, width = 1280, height = 720)
+    bm <- read.bitmap(filename)
+    dims <- dim(bm)
+    values$fov_res_y <- dims[1]
+    values$fov_res_x <- dims[2]
+    list(src = filename, width = values$fov_res_x, height = values$fov_res_y)
   }, deleteFile = FALSE)
   
   observe({
