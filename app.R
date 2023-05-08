@@ -32,7 +32,7 @@ ui <- fluidPage(
                          )
     )),
   mainPanel(
-    imageOutput("preImage", brush = "plot_brush", width = "640px", height = "520px"),
+    imageOutput("preImage", brush = "plot_brush", width = "1280px", height = "720px"),
     actionButton("previous_img", "Previous Image"),
     actionButton("save_advance", "Save Validation and Advance"),
     actionButton("next_img", "Next Image"),
@@ -87,7 +87,7 @@ server <- function(input, output, session) {
   
   output$preImage <- renderImage({
     filename <- normalizePath(file.path(values$acc_table$image_id[values$img_current]))
-    list(src = filename, width = 640, height = 480)
+    list(src = filename, width = 1280, height = 720)
   }, deleteFile = FALSE)
   
   observe({
