@@ -11,6 +11,8 @@ If you use this tool in a paper, please cite it as: Franchak, J. (2023). Eye Tra
 
 This project is a work in progress. The basic functions work: Setting the field of view of the camera, uploading a calibration image, drawing the validation offset, and saving the output. If you find that it does not work with an image file, please log an issue on Github and provide an example image so that I can troubleshoot. 
 
+Currently, only images up to 1280x720 have been tested. Larger images may fail to scale correctly in the user interface. If you have an image that is not rendering as expected, please log an issue and include a sample. 
+
 More features are planned to improve the usability of the app:
 - Keyboard shortcuts
 - Visualizing calibration on previously-coded frames
