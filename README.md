@@ -5,16 +5,14 @@ Author: John Franchak
 
 [https://john-franchak.shinyapps.io/Eye-Tracking-Accuracy-Calculator/](https://john-franchak.shinyapps.io/Eye-Tracking-Accuracy-Calculator/) 
 
-If you use this tool in a paper, please cite it as: Franchak, J. (2022). Eye Tracking Accuracy Calculator (Version 0.1) [Computer software] 
+If you use this tool in a paper, please cite it as: Franchak, J. (2022). Eye Tracking Accuracy Calculator (Version 0.2) [Computer software] 
 
 ### Status of tool
 
-This project is a work in progress. The basic functions work: Setting the field of view of the camera, uploading a calibration image, drawing the validation offset, and saving the output. As of July 5, 2022, it still has not been tested extensively by different users across different inputs, only Positive Science exports at 640x480 pixels. If you find that it does not work with an image file, please log an issue on Github and provide an example image so that I can troubleshoot. 
+This project is a work in progress. The basic functions work: Setting the field of view of the camera, uploading a calibration image, drawing the validation offset, and saving the output. If you find that it does not work with an image file, please log an issue on Github and provide an example image so that I can troubleshoot. 
 
 More features are planned to improve the usability of the app:
-- More detailed, customizable output file
 - Keyboard shortcuts
-- Better handling of larger resolution files
 - Visualizing calibration on previously-coded frames
 
 **Shinapps.io version**. My current account limits the number of hours/month that the app can be used. I'm working on a hosting solution, but I recommend for now that you download the repository and run the shiny app locally from RStudio. Simply open the .RProj file, install any needed packages, and then click on the "Run App" button—it will run locally on your own computer without any limits.
@@ -40,4 +38,5 @@ What you do:
   c. You can use the previous/next images to move more quickly between images.
   d. You can use the "Save Validation and Advance" button to record a measurement and then immediately move to the next frame.
 7. Click download to export the degrees of accuracy to your local computer. Nothing will be retained/saved if you close and reopen the app (or leave the app idle for a while), so be sure to download the result of your work. 
+  a. The exported file will also include the image resolution (automatically detected in pixels) and the user-input field of view (in degrees) used to make the calculation.   
 
