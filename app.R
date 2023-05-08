@@ -15,6 +15,7 @@ ui <- fluidPage(
                 ),
                 tabPanel("Setup",  
                          br(),
+                         tags$h5("Error calculations will only be correct if you used the actual field of view/visual angle of your eye tracker. This default value is for an early-model Positive Science eye tracker. Check the manufacturer's specifications for the field of view for your equipment."),
                          numericInput('fovx', 'Horizontal field of view (º)', 54.4, min = 1, max = 180, width = '60%'),
                          numericInput('fovy', 'Vertical field of view (º)', 42.2, min = 1, max = 180, width = '60%'),
                          fileInput("myFile", "Choose image files", multiple = TRUE, accept = c('image/png', 'image/jpeg')),
