@@ -44,11 +44,11 @@ server <- function(input, output, session) {
   initialize_acc_table <- function(inFile){
     if (is.null(inFile)) {
       t <- tibble(image_id = c("./images/356.jpg","./images/357.jpg","./images/358.jpg"), 
-                    img_name = c("test_image1", "test_image2", "test_image3"),
+                    img_name = c("test_image1", "test_image2", "test_image3"), pixx = NA, pixy = NA, degx = NA, degy = NA,
                   error_degrees = NA, distance_pixels = NA,)
     } else{
       tibble(image_id = inFile$datapath, 
-             img_name = inFile$name,
+             img_name = inFile$name, pixx = NA, pixy = NA, degx = NA, degy = NA,
              error_degrees = NA, distance_pixels = NA)
     }
   }
@@ -102,6 +102,10 @@ server <- function(input, output, session) {
     acc_output <- xy_dist(input$plot_brush)
     values$acc_table[values$img_current, "distance_pixels"] <- acc_output$dist_px
     values$acc_table[values$img_current, "error_degrees"] <- acc_output$acc_deg
+    values$acc_table[values$img_current, "pixx"] <- values$fov_res_x
+    values$acc_table[values$img_current, "pixy"] <- values$fov_res_y
+    values$acc_table[values$img_current, "degx"] <- values$fov_x
+    values$acc_table[values$img_current, "degy"] <- values$fov_y
     updateReactable("table", data = values$acc_table)
     updateReactable("table", selected = values$img_current)
   })
@@ -113,6 +117,7 @@ server <- function(input, output, session) {
               columns = list(
                 img_name = colDef(name = "Image"),
                 image_id = colDef(show = FALSE),
+                degx = colDef(show = FALSE), degy = colDef(show = FALSE), pixx = colDef(show = FALSE), pixy = colDef(show = FALSE),
                 error_degrees = colDef(name = "Error", format = colFormat(suffix = "º", digits = 2)),
                 distance_pixels = colDef(name = "Raw Distance", format = colFormat(suffix = " pixels", digits = 2))))
   })
@@ -120,8 +125,8 @@ server <- function(input, output, session) {
   observeEvent(input$reset, {
     values$acc_table = initialize_acc_table(NULL)
     values$img_current = 1
-    values$fov_x = 54.4
-    values$fov_y = 42.2
+    # values$fov_x = 54.4
+    # values$fov_y = 42.2
     updateReactable("table", data = values$acc_table)
     updateReactable("table", selected = values$img_current)
   })
@@ -134,6 +139,11 @@ server <- function(input, output, session) {
   observeEvent(input$save_advance, {
     acc_output <- xy_dist(input$plot_brush)
     values$acc_table[values$img_current, "distance_pixels"] <- acc_output$dist_px
+    values$acc_table[values$img_current, "error_degrees"] <- acc_output$acc_deg
+    values$acc_table[values$img_current, "pixx"] <- values$fov_res_x
+    values$acc_table[values$img_current, "pixy"] <- values$fov_res_y
+    values$acc_table[values$img_current, "degx"] <- values$fov_x
+    values$acc_table[values$img_current, "degy"] <- values$fov_y
     values$acc_table[values$img_current, "error_degrees"] <- acc_output$acc_deg
     updateReactable("table", data = values$acc_table)
     values$img_current <- ifelse(values$img_current >= nrow(values$acc_table), nrow(values$acc_table), values$img_current + 1)
@@ -158,7 +168,9 @@ server <- function(input, output, session) {
       paste("et_calibration_output.csv", sep = "")
     },
     content = function(file) {
-      write.csv(values$acc_table, file, row.names = TRUE)
+      acc_table_print <- values$acc_table %>% 
+        rename(image_pixels_x = pixx, image_pixels_y = pixy, fov_degrees_x = degx, fov_degrees_y = degy)
+      write.csv(acc_table_print, file, row.names = TRUE)
     }
   )
 }
